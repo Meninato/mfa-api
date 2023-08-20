@@ -32,7 +32,6 @@ public class DataContext : DbContext
             e.HasKey(e => e.Id);
             e.HasIndex(e => e.Email).IsUnique();
 
-            e.Property(e => e.Title).IsRequired();
             e.Property(e => e.FirstName).IsRequired();
             e.Property(e => e.LastName).IsRequired();
             e.Property(e => e.Role).IsRequired();

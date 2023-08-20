@@ -13,8 +13,8 @@ namespace MfaApi.Authorization;
 public interface IJwtUtils
 {
     public string GenerateJwtToken(Account account);
-    public int? ValidateJwtToken(string token);
-    public RefreshToken GenerateRefreshToken(string ipAddress);
+    public int? ValidateJwtToken(string? token);
+    public RefreshToken GenerateRefreshToken(string? ipAddress);
 }
 
 public class JwtUtils : IJwtUtils
@@ -45,7 +45,7 @@ public class JwtUtils : IJwtUtils
         return tokenHandler.WriteToken(token);
     }
 
-    public int? ValidateJwtToken(string token)
+    public int? ValidateJwtToken(string? token)
     {
         if (token == null)
             return null;
@@ -77,7 +77,7 @@ public class JwtUtils : IJwtUtils
         }
     }
 
-    public RefreshToken GenerateRefreshToken(string ipAddress)
+    public RefreshToken GenerateRefreshToken(string? ipAddress)
     {
         var refreshToken = new RefreshToken
         {

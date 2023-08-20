@@ -11,20 +11,23 @@ public class InvalidModelStateResponse
     public InvalidModelStateResponse(ModelStateDictionary modelState)
     {
         var errorsInModelState = modelState
-            .Where(x => x.Value.Errors.Count > 0)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(x => x.ErrorMessage).ToArray());
+            .Where(x => x.Value?.Errors.Count > 0)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.Errors.Select(x => x.ErrorMessage).ToArray());
 
         foreach (var error in errorsInModelState)
         {
-            foreach (var subError in error.Value)
+            if(error.Value != null)
             {
-                var errorModel = new InvalidModelStateError
+                foreach (var subError in error.Value)
                 {
-                    FieldName = error.Key,
-                    Message = subError
-                };
+                    var errorModel = new InvalidModelStateError
+                    {
+                        FieldName = error.Key,
+                        Message = subError
+                    };
 
-                Errors.Add(errorModel);
+                    Errors.Add(errorModel);
+                }
             }
         }
     }
@@ -32,6 +35,6 @@ public class InvalidModelStateResponse
 
 public class InvalidModelStateError
 {
-    public string FieldName { get; set; }
-    public string Message { get; set; }
+    public required string FieldName { get; set; }
+    public required string Message { get; set; }
 }

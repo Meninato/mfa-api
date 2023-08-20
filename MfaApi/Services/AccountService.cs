@@ -17,12 +17,12 @@ namespace MfaApi.Services;
 
 public interface IAccountService
 {
-    AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
-    AuthenticateResponse RefreshToken(string token, string ipAddress);
-    void RevokeToken(string token, string ipAddress);
-    void Register(RegisterRequest model, string origin);
+    AuthenticateResponse Authenticate(AuthenticateRequest model, string? ipAddress);
+    AuthenticateResponse RefreshToken(string? token, string? ipAddress);
+    void RevokeToken(string token, string? ipAddress);
+    void Register(RegisterRequest model, string? origin);
     void VerifyEmail(string token);
-    void ForgotPassword(ForgotPasswordRequest model, string origin);
+    void ForgotPassword(ForgotPasswordRequest model, string? origin);
     void ValidateResetToken(ValidateResetTokenRequest model);
     void ResetPassword(ResetPasswordRequest model);
     IEnumerable<AccountResponse> GetAll();
@@ -54,7 +54,7 @@ public class AccountService : IAccountService
         _emailService = emailService;
     }
 
-    public AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress)
+    public AuthenticateResponse Authenticate(AuthenticateRequest model, string? ipAddress)
     {
         var account = _context.Accounts.SingleOrDefault(x => x.Email == model.Email);
 
@@ -68,7 +68,7 @@ public class AccountService : IAccountService
         account.RefreshTokens.Add(refreshToken);
 
         // remove old refresh tokens from account
-        removeOldRefreshTokens(account);
+        RemoveOldRefreshTokens(account);
 
         // save changes to db
         _context.Update(account);
@@ -80,15 +80,15 @@ public class AccountService : IAccountService
         return response;
     }
 
-    public AuthenticateResponse RefreshToken(string token, string ipAddress)
+    public AuthenticateResponse RefreshToken(string? token, string? ipAddress)
     {
-        var account = getAccountByRefreshToken(token);
+        var account = GetAccountByRefreshToken(token);
         var refreshToken = account.RefreshTokens.Single(x => x.Token == token);
 
         if (refreshToken.IsRevoked)
         {
             // revoke all descendant tokens in case this token has been compromised
-            revokeDescendantRefreshTokens(refreshToken, account, ipAddress, $"Attempted reuse of revoked ancestor token: {token}");
+            RevokeDescendantRefreshTokens(refreshToken, account, ipAddress, $"Attempted reuse of revoked ancestor token: {token}");
             _context.Update(account);
             _context.SaveChanges();
         }
@@ -101,7 +101,7 @@ public class AccountService : IAccountService
         account.RefreshTokens.Add(newRefreshToken);
 
         // remove old refresh tokens from account
-        removeOldRefreshTokens(account);
+        RemoveOldRefreshTokens(account);
 
         // save changes to db
         _context.Update(account);
@@ -117,21 +117,21 @@ public class AccountService : IAccountService
         return response;
     }
 
-    public void RevokeToken(string token, string ipAddress)
+    public void RevokeToken(string token, string? ipAddress)
     {
-        var account = getAccountByRefreshToken(token);
+        var account = GetAccountByRefreshToken(token);
         var refreshToken = account.RefreshTokens.Single(x => x.Token == token);
 
         if (!refreshToken.IsActive)
             throw new AppException("Invalid token");
 
         // revoke token and save
-        revokeRefreshToken(refreshToken, ipAddress, "Revoked without replacement");
+        RevokeRefreshToken(refreshToken, ipAddress, "Revoked without replacement");
         _context.Update(account);
         _context.SaveChanges();
     }
 
-    public void Register(RegisterRequest model, string origin)
+    public void Register(RegisterRequest model, string? origin)
     {
         // validate
         if (_context.Accounts.Any(x => x.Email == model.Email))
@@ -173,7 +173,7 @@ public class AccountService : IAccountService
         _context.SaveChanges();
     }
 
-    public void ForgotPassword(ForgotPasswordRequest model, string origin)
+    public void ForgotPassword(ForgotPasswordRequest model, string? origin)
     {
         var account = _context.Accounts.SingleOrDefault(x => x.Email == model.Email);
 
@@ -280,7 +280,7 @@ public class AccountService : IAccountService
         return account;
     }
 
-    private Account getAccountByRefreshToken(string token)
+    private Account GetAccountByRefreshToken(string? token)
     {
         var account = _context.Accounts.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
         if (account == null) throw new AppException("Invalid token");
@@ -335,34 +335,37 @@ public class AccountService : IAccountService
         return token;
     }
 
-    private RefreshToken RotateRefreshToken(RefreshToken refreshToken, string ipAddress)
+    private RefreshToken RotateRefreshToken(RefreshToken refreshToken, string? ipAddress)
     {
         var newRefreshToken = _jwtUtils.GenerateRefreshToken(ipAddress);
-        revokeRefreshToken(refreshToken, ipAddress, "Replaced by new token", newRefreshToken.Token);
+        RevokeRefreshToken(refreshToken, ipAddress, "Replaced by new token", newRefreshToken.Token);
         return newRefreshToken;
     }
 
-    private void removeOldRefreshTokens(Account account)
+    private void RemoveOldRefreshTokens(Account account)
     {
         account.RefreshTokens.RemoveAll(x =>
             !x.IsActive &&
             x.Created.AddDays(_appSettings.RefreshTokenTTL) <= DateTime.UtcNow);
     }
 
-    private void revokeDescendantRefreshTokens(RefreshToken refreshToken, Account account, string ipAddress, string reason)
+    private void RevokeDescendantRefreshTokens(RefreshToken refreshToken, Account account, string? ipAddress, string reason)
     {
         // recursively traverse the refresh token chain and ensure all descendants are revoked
         if (!string.IsNullOrEmpty(refreshToken.ReplacedByToken))
         {
             var childToken = account.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);
-            if (childToken.IsActive)
-                revokeRefreshToken(childToken, ipAddress, reason);
-            else
-                revokeDescendantRefreshTokens(childToken, account, ipAddress, reason);
+            if(childToken != null)
+            {
+                if (childToken.IsActive)
+                    RevokeRefreshToken(childToken, ipAddress, reason);
+                else
+                    RevokeDescendantRefreshTokens(childToken, account, ipAddress, reason);
+            }
         }
     }
 
-    private void revokeRefreshToken(RefreshToken token, string ipAddress, string? reason = null, string? replacedByToken = null)
+    private void RevokeRefreshToken(RefreshToken token, string? ipAddress, string? reason = null, string? replacedByToken = null)
     {
         token.Revoked = DateTime.UtcNow;
         token.RevokedByIp = ipAddress;
@@ -370,7 +373,7 @@ public class AccountService : IAccountService
         token.ReplacedByToken = replacedByToken;
     }
 
-    private void SendVerificationEmail(Account account, string origin)
+    private void SendVerificationEmail(Account account, string? origin)
     {
         string message;
         if (!string.IsNullOrEmpty(origin))
@@ -398,7 +401,7 @@ public class AccountService : IAccountService
         );
     }
 
-    private void SendAlreadyRegisteredEmail(string email, string origin)
+    private void SendAlreadyRegisteredEmail(string email, string? origin)
     {
         string message;
         if (!string.IsNullOrEmpty(origin))
@@ -415,7 +418,7 @@ public class AccountService : IAccountService
         );
     }
 
-    private void SendPasswordResetEmail(Account account, string origin)
+    private void SendPasswordResetEmail(Account account, string? origin)
     {
         string message;
         if (!string.IsNullOrEmpty(origin))

@@ -5,5 +5,5 @@ namespace MfaApi.Models.Accounts;
 public class ValidateResetTokenRequest
 {
     [Required]
-    public string Token { get; set; }
+    public string Token { get; set; } = default!;
 }

@@ -3,7 +3,6 @@
 public class Account
 {
     public int Id { get; set; }
-    public string Title { get; set; } = default!;
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string Email { get; set; } = default!;

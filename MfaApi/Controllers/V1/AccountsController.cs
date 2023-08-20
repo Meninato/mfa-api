@@ -47,7 +47,7 @@ public class AccountsController : BaseController
             return BadRequest(new { message = "Token is required" });
 
         // users can revoke their own tokens and admins can revoke any tokens
-        if (!Account.OwnsToken(token) && Account.Role != Role.Admin)
+        if (!Account!.OwnsToken(token) && Account.Role != Role.Admin)
             return Unauthorized(new { message = "Unauthorized" });
 
         _accountService.RevokeToken(token, IpAddress());
@@ -106,7 +106,7 @@ public class AccountsController : BaseController
     public ActionResult<AccountResponse> GetById(int id)
     {
         // users can get their own account and admins can get any account
-        if (id != Account.Id && Account.Role != Role.Admin)
+        if (id != Account!.Id && Account.Role != Role.Admin)
             return Unauthorized(new { message = "Unauthorized" });
 
         var account = _accountService.GetById(id);
@@ -125,7 +125,7 @@ public class AccountsController : BaseController
     public ActionResult<AccountResponse> Update(int id, UpdateRequest model)
     {
         // users can update their own account and admins can update any account
-        if (id != Account.Id && Account.Role != Role.Admin)
+        if (id != Account!.Id && Account.Role != Role.Admin)
             return Unauthorized(new { message = "Unauthorized" });
 
         // only admins can update role
@@ -140,7 +140,7 @@ public class AccountsController : BaseController
     public IActionResult Delete(int id)
     {
         // users can delete their own account and admins can delete any account
-        if (id != Account.Id && Account.Role != Role.Admin)
+        if (id != Account!.Id && Account.Role != Role.Admin)
             return Unauthorized(new { message = "Unauthorized" });
 
         _accountService.Delete(id);
@@ -159,11 +159,15 @@ public class AccountsController : BaseController
         Response.Cookies.Append("refreshToken", token, cookieOptions);
     }
 
-    private string IpAddress()
+    private string? IpAddress()
     {
+        string? ip;
+
         if (Request.Headers.ContainsKey("X-Forwarded-For"))
-            return Request.Headers["X-Forwarded-For"];
+            ip = Request.Headers["X-Forwarded-For"];
         else
-            return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            ip = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+
+        return ip;
     }
 }

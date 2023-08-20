@@ -7,5 +7,5 @@ namespace MfaApi.Controllers;
 public class BaseController : ControllerBase
 {
     // returns the current authenticated account (null if not logged in)
-    public Account Account => (Account)HttpContext.Items["Account"];
+    public Account? Account => HttpContext.Items["Account"] as Account;
 }
