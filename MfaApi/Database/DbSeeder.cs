@@ -25,7 +25,6 @@ public class DbSeeder
             new Account
             {
                 Id = 1,
-                Title = "Mr",
                 FirstName = "Bob",
                 LastName = "Blue",
                 Email = "bob@blue.com",
