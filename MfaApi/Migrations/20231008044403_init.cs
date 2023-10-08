@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MfaApi.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,7 +40,8 @@ namespace MfaApi.Migrations
                 name: "RefreshToken",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     AccountId = table.Column<int>(type: "INTEGER", nullable: false),
                     Token = table.Column<string>(type: "TEXT", nullable: false),
                     Expires = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -53,7 +54,7 @@ namespace MfaApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RefreshToken", x => new { x.AccountId, x.Id });
+                    table.PrimaryKey("PK_RefreshToken", x => x.Id);
                     table.ForeignKey(
                         name: "FK_RefreshToken_Accounts_AccountId",
                         column: x => x.AccountId,
@@ -65,13 +66,18 @@ namespace MfaApi.Migrations
             migrationBuilder.InsertData(
                 table: "Accounts",
                 columns: new[] { "Id", "AcceptTerms", "Created", "Email", "FirstName", "LastName", "PasswordHash", "PasswordReset", "ResetToken", "ResetTokenExpires", "Role", "Updated", "VerificationToken", "Verified" },
-                values: new object[] { 1, true, new DateTime(2023, 9, 12, 19, 25, 47, 73, DateTimeKind.Local).AddTicks(3758), "bob@blue.com", "Bob", "Blue", "$2a$11$hA.LZNdRRv3fWhcTzNWWs.WzdOo8mKaaym0xsD7gnj/62fdfBS/xC", null, null, null, 0, null, null, new DateTime(2023, 9, 12, 19, 25, 47, 73, DateTimeKind.Local).AddTicks(3729) });
+                values: new object[] { 1, true, new DateTime(2023, 10, 8, 1, 44, 3, 555, DateTimeKind.Local).AddTicks(853), "bob@blue.com", "Bob", "Blue", "$2a$11$nQNhd5GrlwgaQa.nkRwx3OBdBdXVwITPnJ/Eu54v2P15mUHNuGtqq", null, null, null, 0, null, null, new DateTime(2023, 10, 8, 1, 44, 3, 555, DateTimeKind.Local).AddTicks(832) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_Email",
                 table: "Accounts",
                 column: "Email",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshToken_AccountId",
+                table: "RefreshToken",
+                column: "AccountId");
         }
 
         /// <inheritdoc />

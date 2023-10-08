@@ -60,7 +60,7 @@ public class AccountService : IAccountService
 
         // validate
         if (account == null || !account.IsVerified || !BCryptNet.Verify(model.Password, account.PasswordHash))
-            throw new AppException("Email or password is incorrect", HttpStatusCode.Unauthorized);
+            throw new AppException("Email ou senha estão incorretos", HttpStatusCode.Unauthorized);
 
         // authentication successful so generate jwt and refresh tokens
         var jwtToken = _jwtUtils.GenerateJwtToken(account);

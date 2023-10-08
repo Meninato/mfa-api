@@ -28,6 +28,11 @@ public class DataContext : DbContext
         modelBuilder.Entity<Account>(e =>
         {
             e.OwnsMany(acc => acc.RefreshTokens).WithOwner(rt => rt.Account);
+            e.OwnsMany(acc => acc.RefreshTokens, cb =>
+            {
+                cb.WithOwner(rt => rt.Account);
+                cb.HasKey(x => x.Id);
+            });
 
             e.HasKey(e => e.Id);
             e.HasIndex(e => e.Email).IsUnique();

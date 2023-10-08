@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MfaApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230912222547_Init")]
-    partial class Init
+    [Migration("20231008044403_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -81,13 +81,13 @@ namespace MfaApi.Migrations
                         {
                             Id = 1,
                             AcceptTerms = true,
-                            Created = new DateTime(2023, 9, 12, 19, 25, 47, 73, DateTimeKind.Local).AddTicks(3758),
+                            Created = new DateTime(2023, 10, 8, 1, 44, 3, 555, DateTimeKind.Local).AddTicks(853),
                             Email = "bob@blue.com",
                             FirstName = "Bob",
                             LastName = "Blue",
-                            PasswordHash = "$2a$11$hA.LZNdRRv3fWhcTzNWWs.WzdOo8mKaaym0xsD7gnj/62fdfBS/xC",
+                            PasswordHash = "$2a$11$nQNhd5GrlwgaQa.nkRwx3OBdBdXVwITPnJ/Eu54v2P15mUHNuGtqq",
                             Role = 0,
-                            Verified = new DateTime(2023, 9, 12, 19, 25, 47, 73, DateTimeKind.Local).AddTicks(3729)
+                            Verified = new DateTime(2023, 10, 8, 1, 44, 3, 555, DateTimeKind.Local).AddTicks(832)
                         });
                 });
 
@@ -95,11 +95,11 @@ namespace MfaApi.Migrations
                 {
                     b.OwnsMany("MfaApi.Entities.RefreshToken", "RefreshTokens", b1 =>
                         {
-                            b1.Property<int>("AccountId")
-                                .HasColumnType("INTEGER");
-
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("AccountId")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<DateTime>("Created")
@@ -127,7 +127,9 @@ namespace MfaApi.Migrations
                                 .IsRequired()
                                 .HasColumnType("TEXT");
 
-                            b1.HasKey("AccountId", "Id");
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("AccountId");
 
                             b1.ToTable("RefreshToken");
 
