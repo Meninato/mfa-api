@@ -5,10 +5,7 @@ using MfaApi.Entities;
 using MfaApi.Helpers;
 using MfaApi.Models.Accounts;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using BCryptNet = BCrypt.Net.BCrypt;
@@ -293,20 +290,6 @@ public class AccountService : IAccountService
             x.ResetToken == token && x.ResetTokenExpires > DateTime.UtcNow);
         if (account == null) throw new AppException("Invalid token");
         return account;
-    }
-
-    private string generateJwtToken(Account account)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[] { new Claim("id", account.Id.ToString()) }),
-            Expires = DateTime.UtcNow.AddMinutes(15),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
     }
 
     private string GenerateResetToken()

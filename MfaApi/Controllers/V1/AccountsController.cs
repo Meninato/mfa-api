@@ -18,6 +18,12 @@ public class AccountsController : BaseController
         _accountService = accountService;
     }
 
+    [HttpPost("signin/with-token")]
+    public ActionResult<AccountResponse> GetByToken()
+    {
+        return _accountService.GetById(this.Account!.Id);
+    }
+
     [AllowAnonymous]
     [HttpPost("authenticate")]
     public ActionResult<AuthenticateResponse> Authenticate(AuthenticateRequest model)
