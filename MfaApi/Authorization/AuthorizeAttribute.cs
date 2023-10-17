@@ -23,10 +23,13 @@ public class AuthorizeAttribute : Attribute, IAuthorizationFilter
 
         // authorization
         var account = context.HttpContext.Items["Account"] as Account;
-        if (account == null || (_roles.Any() && !_roles.Contains(account.Role)))
+        if(account == null)
         {
-            // not logged in or role not authorized
             context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+        }
+        else if((_roles.Any() && !_roles.Contains(account.Role)))
+        {
+            context.Result = new JsonResult(new { message = "Forbidden" }) { StatusCode = StatusCodes.Status403Forbidden };
         }
     }
 }
