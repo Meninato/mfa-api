@@ -12,11 +12,12 @@ public class RegisterRequest
     public string LastName { get; set; } = default!;
 
     [Required]
+    [MaxLength(254)]
     [EmailAddress]
     public string Email { get; set; } = default!;
 
     [Required]
-    [MinLength(6)]
+    [MinLength(8)]
     public string Password { get; set; } = default!;
 
     [Required]

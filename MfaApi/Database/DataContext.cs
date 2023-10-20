@@ -37,10 +37,10 @@ public class DataContext : DbContext
             e.HasKey(e => e.Id);
             e.HasIndex(e => e.Email).IsUnique();
 
-            e.Property(e => e.FirstName).IsRequired();
-            e.Property(e => e.LastName).IsRequired();
+            e.Property(e => e.FirstName).IsRequired().HasMaxLength(50);
+            e.Property(e => e.LastName).IsRequired().HasMaxLength(100);
             e.Property(e => e.Role).IsRequired();
-            e.Property(e => e.Email).IsRequired();
+            e.Property(e => e.Email).IsRequired().HasMaxLength(254);
             e.Property(e => e.PasswordHash).IsRequired();
         });
 
