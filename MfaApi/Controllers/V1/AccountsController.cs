@@ -12,10 +12,12 @@ namespace MfaApi.Controllers.V1;
 public class AccountsController : BaseController
 {
     private readonly IAccountService _accountService;
+    private readonly ILogger _logger;
 
-    public AccountsController(IAccountService accountService)
+    public AccountsController(IAccountService accountService, ILogger<AccountsController> logger)
     {
         _accountService = accountService;
+        _logger = logger;
     }
 
     [HttpPost("signin/with-token")]

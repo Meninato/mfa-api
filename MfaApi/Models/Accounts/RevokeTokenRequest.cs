@@ -2,5 +2,5 @@
 
 public class RevokeTokenRequest
 {
-    public string Token { get; set; } = default!;
+    public string? Token { get; set; } 
 }

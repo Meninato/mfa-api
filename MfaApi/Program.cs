@@ -7,12 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+//builder.Logging.ClearProviders();
+//builder.Logging.AddConsole();
 
 // Add services to the container.
 {
     var services = builder.Services;
     var env = builder.Environment;
 
+    //services.AddLogging();
     services.AddDbContext<DataContext>();
     services.AddCors();
     services.AddControllers().AddJsonOptions(x =>
