@@ -83,7 +83,7 @@ public class AccountsController : BaseController
     public IActionResult ForgotPassword(ForgotPasswordRequest model)
     {
         _accountService.ForgotPassword(model, Request.Headers["origin"]);
-        return Ok(new { message = "Please check your email for password reset instructions" });
+        return Ok(new { message = "Por favor, siga as instruções no seu e-mail para alterar a senha." });
     }
 
     [AllowAnonymous]

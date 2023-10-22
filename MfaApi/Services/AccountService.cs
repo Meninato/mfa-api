@@ -407,19 +407,19 @@ public class AccountService : IAccountService
         if (!string.IsNullOrEmpty(origin))
         {
             var resetUrl = $"{origin}/api/v1/accounts/reset-password?token={account.ResetToken}";
-            message = $@"<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
+            message = $@"<p>A gente recebeu uma solicitação de redefinição de senha desta conta {account.Email}. Por favor, clique no link abaixo para alterar a sua senha. O link é válido por 1 dia:</p>
                             <p><a href=""{resetUrl}"">{resetUrl}</a></p>";
         }
         else
         {
-            message = $@"<p>Please use the below token to reset your password with the <code>/api/v1/accounts/reset-password</code> api route:</p>
+            message = $@"<p>Por favor, use o token abaixo para resetar a sua senha com o endpoint <code>/api/v1/accounts/reset-password</code>:</p>
                             <p><code>{account.ResetToken}</code></p>";
         }
 
         _emailService.Send(
             to: account.Email,
-            subject: "Sign-up Verification API - Reset Password",
-            html: $@"<h4>Reset Password Email</h4>
+            subject: "Defina sua nova senha",
+            html: $@"<h4>Olá, {account.FirstName} {account.LastName}</h4>
                         {message}"
         );
     }
