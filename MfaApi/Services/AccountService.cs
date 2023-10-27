@@ -36,19 +36,22 @@ public class AccountService : IAccountService
     private readonly IMapper _mapper;
     private readonly AppSettings _appSettings;
     private readonly IEmailService _emailService;
+    private readonly ITemplateService _templateService;
 
     public AccountService(
         DataContext context,
         IJwtUtils jwtUtils,
         IMapper mapper,
         IOptions<AppSettings> appSettings,
-        IEmailService emailService)
+        IEmailService emailService,
+        ITemplateService templateService)
     {
         _context = context;
         _jwtUtils = jwtUtils;
         _mapper = mapper;
         _appSettings = appSettings.Value;
         _emailService = emailService;
+        _templateService = templateService;
     }
 
     public AuthenticateResponse Authenticate(AuthenticateRequest model, string? ipAddress)
@@ -404,23 +407,25 @@ public class AccountService : IAccountService
     private void SendPasswordResetEmail(Account account, string? origin)
     {
         string message;
+        string resetUrl = "";
+        string html;
         if (!string.IsNullOrEmpty(origin))
         {
-            var resetUrl = $"{origin}/api/v1/accounts/reset-password?token={account.ResetToken}";
-            message = $@"<p>A gente recebeu uma solicitação de redefinição de senha desta conta {account.Email}. Por favor, clique no link abaixo para alterar a sua senha. O link é válido por 1 dia:</p>
-                            <p><a href=""{resetUrl}"">{resetUrl}</a></p>";
+            resetUrl = $"{origin}/api/v1/accounts/reset-password?token={account.ResetToken}";
+            html = _templateService.GetForgotPassword(account, resetUrl);
         }
         else
         {
             message = $@"<p>Por favor, use o token abaixo para resetar a sua senha com o endpoint <code>/api/v1/accounts/reset-password</code>:</p>
                             <p><code>{account.ResetToken}</code></p>";
+            html = $@"<h4>Olá, {account.FirstName} {account.LastName}</h4>
+                        {message}";
         }
 
         _emailService.Send(
             to: account.Email,
             subject: "Defina sua nova senha",
-            html: $@"<h4>Olá, {account.FirstName} {account.LastName}</h4>
-                        {message}"
+            html: html
         );
     }
 }
