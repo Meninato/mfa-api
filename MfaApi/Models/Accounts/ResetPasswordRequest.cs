@@ -8,7 +8,7 @@ public class ResetPasswordRequest
     public string Token { get; set; } = default!;
 
     [Required]
-    [MinLength(6)]
+    [MinLength(8)]
     public string Password { get; set; } = default!;
 
     [Required]

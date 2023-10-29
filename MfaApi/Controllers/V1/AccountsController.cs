@@ -91,7 +91,7 @@ public class AccountsController : BaseController
     public IActionResult ValidateResetToken(ValidateResetTokenRequest model)
     {
         _accountService.ValidateResetToken(model);
-        return Ok(new { message = "Token is valid" });
+        return Ok(new { message = "Token é válido" });
     }
 
     [AllowAnonymous]
@@ -99,7 +99,7 @@ public class AccountsController : BaseController
     public IActionResult ResetPassword(ResetPasswordRequest model)
     {
         _accountService.ResetPassword(model);
-        return Ok(new { message = "Password reset successful, you can now login" });
+        return Ok(new { message = "Senha alterada com sucesso, você pode acessar agora" });
     }
 
     [Authorize(Role.Admin)]

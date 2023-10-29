@@ -94,7 +94,7 @@ public class AccountService : IAccountService
         }
 
         if (!refreshToken.IsActive)
-            throw new AppException("Invalid token");
+            throw new AppException("Token inválido");
 
         // replace old refresh token with a new one (rotate token)
         var newRefreshToken = RotateRefreshToken(refreshToken, ipAddress);
@@ -123,7 +123,7 @@ public class AccountService : IAccountService
         var refreshToken = account.RefreshTokens.Single(x => x.Token == token);
 
         if (!refreshToken.IsActive)
-            throw new AppException("Invalid token");
+            throw new AppException("Token inválido");
 
         // revoke token and save
         RevokeRefreshToken(refreshToken, ipAddress, "Revoked without replacement");
@@ -283,7 +283,7 @@ public class AccountService : IAccountService
     private Account GetAccountByRefreshToken(string? token)
     {
         var account = _context.Accounts.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
-        if (account == null) throw new AppException("Invalid token");
+        if (account == null) throw new AppException("Token inválido");
         return account;
     }
 
@@ -291,7 +291,7 @@ public class AccountService : IAccountService
     {
         var account = _context.Accounts.SingleOrDefault(x =>
             x.ResetToken == token && x.ResetTokenExpires > DateTime.UtcNow);
-        if (account == null) throw new AppException("Invalid token");
+        if (account == null) throw new AppException("Token inválido");
         return account;
     }
 
@@ -411,7 +411,7 @@ public class AccountService : IAccountService
         string html;
         if (!string.IsNullOrEmpty(origin))
         {
-            resetUrl = $"{origin}/api/v1/accounts/reset-password?token={account.ResetToken}";
+            resetUrl = $"{origin}/auth/reset-password?token={account.ResetToken}";
             html = _templateService.GetForgotPassword(account, resetUrl);
         }
         else
