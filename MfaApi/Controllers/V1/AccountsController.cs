@@ -67,7 +67,7 @@ public class AccountsController : BaseController
     public IActionResult Register(RegisterRequest model)
     {
         _accountService.Register(model, Request.Headers["origin"]);
-        return Ok(new { message = "Registration successful, please check your email for verification instructions" });
+        return Ok(new { message = "Conta registrada com sucesso. Falta pouco! Basta acessar o seu e-mail e seguir a instruções para confirmar que você é o dono deste e-mail." });
     }
 
     [AllowAnonymous]
@@ -75,7 +75,7 @@ public class AccountsController : BaseController
     public IActionResult VerifyEmail(VerifyEmailRequest model)
     {
         _accountService.VerifyEmail(model.Token);
-        return Ok(new { message = "Verification successful, you can now login" });
+        return Ok(new { message = "Tudo pronto! você pode fazer login agora." });
     }
 
     [AllowAnonymous]

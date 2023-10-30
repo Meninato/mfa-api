@@ -6,9 +6,11 @@ public class RegisterRequest
 {
 
     [Required]
+    [MaxLength(50)]
     public string FirstName { get; set; } = default!;
 
     [Required]
+    [MaxLength(100)]
     public string LastName { get; set; } = default!;
 
     [Required]

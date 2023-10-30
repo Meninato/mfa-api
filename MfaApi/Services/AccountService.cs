@@ -391,15 +391,15 @@ public class AccountService : IAccountService
     {
         string message;
         if (!string.IsNullOrEmpty(origin))
-            message = $@"<p>If you don't know your password please visit the <a href=""{origin}/api/v1/accounts/forgot-password"">forgot password</a> page.</p>";
+            message = $@"<p>Se você não lembra a sua senha, por favor visite a página <a href=""{origin}/auth/forgot-password"">esqueceu a senha?</a>.</p>";
         else
-            message = "<p>If you don't know your password you can reset it via the <code>/api/v1/accounts/forgot-password</code> api route.</p>";
+            message = "<p>Se você não lembra a sua senha você pode alterá-la através da api <code>/api/v1/accounts/forgot-password</code>.</p>";
 
         _emailService.Send(
             to: email,
-            subject: "Sign-up Verification API - Email Already Registered",
-            html: $@"<h4>Email Already Registered</h4>
-                        <p>Your email <strong>{email}</strong> is already registered.</p>
+            subject: "Nova Conta - E-mail Existente",
+            html: $@"<h4>Email já utilizado</h4>
+                        <p>O seu email <strong>{email}</strong> já foi registrado.</p>
                         {message}"
         );
     }
