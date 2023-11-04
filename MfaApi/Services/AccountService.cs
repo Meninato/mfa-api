@@ -164,7 +164,7 @@ public class AccountService : IAccountService
         var account = _context.Accounts.SingleOrDefault(x => x.VerificationToken == token);
 
         if (account == null)
-            throw new AppException("Verification failed");
+            throw new AppException("Verificação falhou");
 
         account.Verified = DateTime.UtcNow;
         account.VerificationToken = null;
@@ -366,7 +366,7 @@ public class AccountService : IAccountService
         {
             // origin exists if request sent from browser single page app (e.g. Angular or React)
             // so send link to verify via single page app
-            var verifyUrl = $"{origin}/api/v1/accounts/verify-email?token={account.VerificationToken}";
+            var verifyUrl = $"{origin}/auth/verify-email?token={account.VerificationToken}";
             message = $@"<p>Please click the below link to verify your email address:</p>
                             <p><a href=""{verifyUrl}"">{verifyUrl}</a></p>";
         }
