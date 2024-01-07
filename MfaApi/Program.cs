@@ -1,6 +1,7 @@
 using MfaApi.Authorization;
 using MfaApi.Database;
 using MfaApi.Helpers;
+using MfaApi.Hubs.Games.Truco;
 using MfaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,7 @@ var builder = WebApplication.CreateBuilder(args);
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddSignalR();
 
     // configure strongly typed settings object
     services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -48,6 +50,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IAccountService, AccountService>();
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<ITemplateService, TemplateService>();
+    services.AddSingleton<TrucoLobby>();
 }
 
 var app = builder.Build();
@@ -79,6 +82,9 @@ using (var scope = app.Services.CreateScope())
     app.UseMiddleware<JwtMiddleware>();
 
     app.MapControllers();
+    app.MapHub<TrucoHub>("hubs/games/truco");
 }
 
 app.Run("http://localhost:4000");
+
+//TODO: move truco hub endpoint and app endpoint to url config
