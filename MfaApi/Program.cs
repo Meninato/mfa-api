@@ -44,6 +44,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     // configure strongly typed settings object
     services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+    services.Configure<TrucoSettings>(builder.Configuration.GetSection("TrucoSettings"));
 
     // configure DI for application services
     services.AddScoped<IJwtUtils, JwtUtils>();
@@ -51,6 +52,7 @@ var builder = WebApplication.CreateBuilder(args);
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<ITemplateService, TemplateService>();
     services.AddSingleton<TrucoLobby>();
+    services.AddTransient<TrucoGame>();
 }
 
 var app = builder.Build();

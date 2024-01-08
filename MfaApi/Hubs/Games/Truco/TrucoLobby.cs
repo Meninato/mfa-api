@@ -5,40 +5,50 @@ namespace MfaApi.Hubs.Games.Truco;
 
 public class TrucoLobby
 {
-    // The key into the per connection dictionary used to look up the current game;
-    // Right now this is just flagging a current context of a browser.
-    private static readonly object _gameKey = new();
-
     // FIFO queue of games waiting to be played.
     private readonly ConcurrentQueue<TrucoGame> _waitingGames = new();
 
-    //private readonly ConcurrentDictionary = new();
+    // The set of active games
+    private readonly ConcurrentDictionary<string, TrucoGame> _activeGames = new();
+
+    private readonly IServiceProvider _serviceProvider;
+
+    public TrucoLobby(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
 
     public async Task<TrucoGame> AddPlayerToGameAsync(HubCallerContext hubCallerContext)
     {
-        // There's already a game associated with this player, just return it
-        // TODO: this only works for the same tab, if you open a different tab a new ID gonna be generated or if you 
-        // refresh the page too. Add a dictionary instead
-        if (hubCallerContext.Items[_gameKey] is TrucoGame g)
+        // Try to get a waiting game from the queue (the longest waiting game is served first FIFO)
+        if (_waitingGames.TryPeek(out var game))
         {
-            return g;
+            // Try to add the player to this game. It'll return false if the game is full.
+            if (!await game.AddPlayerAsync(hubCallerContext.ConnectionId))
+            {
+                // Game is full
+            }
+            else
+            {
+                //// A player was added into the game room
+
+                //// When the player disconnects, remove him from the game
+                //hubCallerContext.ConnectionAborted.Register(() =>
+                //{
+                //    // We can't wait here (since this is synchronous), so fire and forget
+                //    _ = game.RemovePlayerAsync(hubCallerContext.ConnectionId);
+                //});
+
+                //// When the game ends, remove the game from the player (he can join another game)
+                //game.Completed.Register(() => hubCallerContext.Items.Remove(_gameKey));
+            }
         }
-        else
-        {
-            hubCallerContext.Items[_gameKey] = new TrucoGame();
-        }
 
-        //// Try to add the player to this game. It'll return false if the game is full.
-        //if(false)
-        //{
+        // If there are no games available create a new one requesting our transient object
+        var newGame = _serviceProvider.GetRequiredService<TrucoGame>();
 
-        //}
-        //else
-        //{
-        //    // Store the association of this player to this game
-        //    hubCallerContext.Items[_gameKey] = game;
-        //}
+        _waitingGames.Enqueue(newGame);
 
-        return new TrucoGame();
+        return newGame;
     }
 }

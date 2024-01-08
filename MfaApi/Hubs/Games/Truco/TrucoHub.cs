@@ -14,7 +14,7 @@ public class TrucoHub : Hub<ITrucoClient>
     public async Task<string> JoinGame()
     {
         TrucoGame game = await _lobby.AddPlayerToGameAsync(this.Context);
-        return "a";
+        return game.Name;
     }
 
     //public async Task<string> JoinGame(string gameName)
