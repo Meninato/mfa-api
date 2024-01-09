@@ -2,8 +2,8 @@
 
 public interface IDeckOfCards
 {
-    Card[] Cards { get; }
     Card[] GetCards();
-    void Shuffle(int? times);
-    Card[] Pick(PickOptions? options);
+    void Shuffle(int times = 1);
+    Card[] Pick(PickOptions options);
+    DrawType? DrawStrategy { get; set; }
 }
