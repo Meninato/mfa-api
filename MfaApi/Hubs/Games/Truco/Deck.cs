@@ -2,13 +2,13 @@
 
 public class Deck : IDeckOfCards
 {
-    private Dictionary<DrawType, Func<int, Card[]>> _pickStrategies = new();
-    private Card[] _pickedCards = new Card[0];
-    private Card[] _cards;
+    private Dictionary<DrawType, Func<int, IEnumerable<Card>>> _pickStrategies = new();
+    private IEnumerable<Card> _pickedCards = Enumerable.Empty<Card>();
+    private IEnumerable<Card> _cards;
 
     public DrawType? DrawStrategy { get; set; } 
 
-    public Deck(Card[] cards)
+    public Deck(IEnumerable<Card> cards)
     {
         _cards = cards;
         _pickStrategies.Add(DrawType.Top, PickFromTop);
@@ -18,7 +18,7 @@ public class Deck : IDeckOfCards
 
     public Card[] GetCards()
     {
-        return _cards;
+        return _cards.ToArray();
     }
 
     public void Shuffle(int times = 1)
@@ -28,15 +28,17 @@ public class Deck : IDeckOfCards
             times = 1;
         }
 
+        var shuffled = _cards.ToArray();
         for (int k = 0; k < times; k++)
         {
-            // In-place Fisher-Yates shuffle
-            for (int i = 0; i < _cards.Length - 1; ++i)
+            for (int i = 0; i < shuffled.Length - 1; ++i)
             {
-                int j = Random.Shared.Next(i, _cards.Length);
-                (_cards[j], _cards[i]) = (_cards[i], _cards[j]);
+                int j = Random.Shared.Next(i, shuffled.Length);
+                (shuffled[j], shuffled[i]) = (shuffled[i], shuffled[j]);
             }
         }
+
+        _cards = shuffled;
     }
 
     public Card[] Pick(PickOptions options)
@@ -44,43 +46,47 @@ public class Deck : IDeckOfCards
         DrawType draw = this.DrawStrategy ?? options.Draw;
         int qty = options.Quantity;
 
-        return _pickStrategies[draw](qty);
+        return _pickStrategies[draw](qty).ToArray();
     }
 
-    private Card[] PickFromTop(int quantity)
+    private IEnumerable<Card> PickFromTop(int quantity)
     {
-        //Pick the cards
-        Card[] picked = new Card[quantity];
-        Array.Copy(_cards, _cards.Length - quantity, picked, 0, quantity);
-
-        //Refresh the cards of the deck removing picked cards
-        Card[] remainingCards = new Card[_cards.Length - quantity];
-        Array.Copy(_cards, 0, remainingCards, 0, _cards.Length - quantity);
-
-        //Refresh the picked cards of the deck adding the fresh ones
-        Card[] burnedCards = new Card[_pickedCards.Length + quantity];
-        Array.Copy(_pickedCards, burnedCards, _pickedCards.Length);
-        Array.Copy(picked, 0, burnedCards, _pickedCards.Length, picked.Length);
-
-        //Update references
-        _cards = remainingCards;
-        _pickedCards = burnedCards;
-
-        //Using LINQ
-        //Card[] p = _cards.TakeLast(quantity).ToArray();
-        //Card[] r = _cards.Take(_cards.Length - quantity).ToArray();
-        //Card[] b = _pickedCards.Concat(p).ToArray();
+        IEnumerable<Card> picked = _cards.TakeLast(quantity);
+        _cards = _cards.Take(_cards.Count() - quantity);
+        _pickedCards = _pickedCards.Concat(picked);
 
         return picked;
     }
 
-    private Card[] PickFromBottom(int quantity)
+    private IEnumerable<Card> PickFromBottom(int quantity)
     {
-        return new Card[quantity];
+        IEnumerable<Card> picked = _cards.Take(quantity);
+        _cards = _cards.Skip(quantity).Take(_cards.Count() - quantity);
+        _pickedCards = _pickedCards.Concat(picked);
+
+        return picked;
     }
 
-    private Card[] PickRandom(int quantity)
+    private IEnumerable<Card> PickRandom(int quantity)
     {
-        return new Card[quantity];
+        IEnumerable<Card> picked = Enumerable.Empty<Card>();
+        HashSet<int> indexes = new HashSet<int>();
+        var cards = _cards.ToArray();
+
+        while(indexes.Count < quantity)
+        {
+            int index = Random.Shared.Next(cards.Length);
+            indexes.Add(index);
+        }
+
+        foreach (int index in indexes)
+        {
+            picked.Append(cards[index]);
+        }
+
+        _cards = _cards.Where(card => picked.Contains(card) == false);
+        _pickedCards = _pickedCards.Concat(picked);
+
+        return picked;
     }
 }

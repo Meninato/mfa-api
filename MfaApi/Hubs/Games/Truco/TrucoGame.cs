@@ -18,14 +18,15 @@ public class TrucoGame
     // Player state keyed by connection id
     private readonly ConcurrentDictionary<string, TrucoPlayer> _players = new();
 
-    public ITrucoClient Group { get; }
-
     // Notification when the game is completed
-    //private readonly CancellationTokenSource _completedCts = new();
+    private readonly CancellationTokenSource _completedCts = new();
 
     public string Name { get; private set; }
+    public ITrucoClient Group { get; }
 
     public bool WaitingForPlayers { get; private set; } = true;
+
+    public CancellationToken Completed => _completedCts.Token;
 
     public TrucoGame(IOptions<TrucoSettings> settings, 
         IHubContext<TrucoHub, ITrucoClient> hubContext)
